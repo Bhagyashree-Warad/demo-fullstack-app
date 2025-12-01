@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demo Frontend</title>
+</head>
+<body>
+
+<h2>Demo Task Manager (Frontend)</h2>
+
+<input id="taskInput" placeholder="Enter task..." />
+<button onclick="addTask()">Add</button>
+
+<div id="taskList"></div>
+
+<script>
+    const API = "http://localhost:3000/tasks";
+
+    async function loadTasks() {
+        const res = await fetch(API);
+        const tasks = await res.json();
+
+        const list = document.getElementById("taskList");
+        list.innerHTML = "";
+
+        tasks.forEach(t => {
+            const row = document.createElement("div");
+            row.textContent = t.text;
+
+            const del = document.createElement("button");
+            del.innerHTML = "Delete";
+            del.onclick = () => deleteTask(t.id);
+
+            row.appendChild(del);
+            list.appendChild(row);
+        });
+    }
+
+    async function addTask() {
+        const text = document.getElementById("taskInput").value;
+        if (!text) return;
+
+        await fetch(API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text })
+        });
+
+        document.getElementById("taskInput").value = "";
+        loadTasks();
+    }
+
+    async function deleteTask(id) {
+        await fetch(`${API}/${id}`, { method: "DELETE" });
+        loadTasks();
+    }
+
+    loadTasks();
+</script>
+
+</body>
+</html>
